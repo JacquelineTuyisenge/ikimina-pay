@@ -15,20 +15,20 @@ Many savings groups in Rwanda still manage contributions manually:
 ## Proposed Solution
 Ikimina Pay gives each group a single place to manage contributions:
 
-- An admin creates a group and adds members.
-- A contribution cycle is set up (for example, 10,000 RWF per month).
-- Members see what they owe and pay through an MTN MoMo payment request sent to their phone.
+- Any registered user can create a group and becomes its admin. The admin adds the members and chooses a treasurer.
+- A contribution (for example, 5,000 RWF per month with a due date) is set up, and every member then owes that amount.
+- Members see what they owe and pay with MTN MoMo or Airtel Money through a payment request sent to their phone.
 - The backend confirms each payment with the provider before marking it as paid, and ignores duplicate callbacks.
-- The treasurer sees a live dashboard of who has paid, who is late and the total collected.
+- The admin and treasurer see who has paid, who is waiting and who is late, plus the total collected.
 - Members receive an email receipt and an SMS confirmation.
 
 ## Core Features
-- User authentication with admin, treasurer and member roles
-- Savings group and member management
-- Contribution cycles and tracking
-- Mobile money payments (MTN MoMo Collections)
+- User registration and login
+- Group and member management with admin, treasurer and member roles (per group)
+- Contributions with an amount and due date
+- Mobile money payments with MTN MoMo and Airtel Money
 - Payment confirmation through verified provider callbacks
-- Treasurer dashboard and payment history
+- Payment tracking: paid, waiting, late and total collected
 - Payment notifications (email receipts and SMS confirmation)
 
 ## Technology Stack
@@ -36,11 +36,11 @@ Ikimina Pay gives each group a single place to manage contributions:
 - Node.js + Express + TypeScript
 - PostgreSQL + Prisma
 - Zod for input validation
-- MTN MoMo Collections API (sandbox)
+- MTN MoMo Collections API and Airtel Money API (sandbox)
 - Africa's Talking (SMS) and a transactional email provider
 - Vercel and Railway for deployment
 
 ## Project Status
 Planning and requirements definition.
 
-> **Note:** This project runs against the MTN MoMo sandbox. Test transactions are labelled as such and no real money is handled.
+> **Note:** This project runs against the providers' sandbox (test) environments. Test transactions are labelled as such and no real money is handled.

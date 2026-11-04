@@ -1,0 +1,119 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MemberRole {
+  ADMIN
+  TREASURER
+  MEMBER
+}
+
+enum ContributionStatus {
+  PENDING
+  PAID
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESSFUL
+  FAILED
+}
+
+enum PaymentProviderName {
+  MTN_MOMO
+  AIRTEL_MONEY
+}
+
+model User {
+  id           String       @id @default(uuid())
+  name         String
+  email        String       @unique
+  phone        String
+  passwordHash String
+  createdAt    DateTime     @default(now())
+  memberships  Membership[]
+}
+
+model Group {
+  id          String              @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime            @default(now())
+  memberships Membership[]
+  cycles      ContributionCycle[]
+}
+
+// A user's role is per group: the same person can be admin of one group
+// and an ordinary member of another.
+model Membership {
+  id            String         @id @default(uuid())
+  userId        String
+  groupId       String
+  role          MemberRole     @default(MEMBER)
+  joinedAt      DateTime       @default(now())
+  user          User           @relation(fields: [userId], references: [id])
+  group         Group          @relation(fields: [groupId], references: [id])
+  contributions Contribution[]
+
+  @@unique([userId, groupId])
+}
+
+model ContributionCycle {
+  id            String         @id @default(uuid())
+  groupId       String
+  title         String
+  amount        Int // RWF per member
+  dueDate       DateTime
+  createdAt     DateTime       @default(now())
+  group         Group          @relation(fields: [groupId], references: [id])
+  contributions Contribution[]
+
+  @@index([groupId])
+}
+
+// One row per member per cycle: what that member owes.
+// "Late" is not stored: it is PENDING and dueDate is in the past.
+model Contribution {
+  id           String             @id @default(uuid())
+  cycleId      String
+  membershipId String
+  amount       Int
+  status       ContributionStatus @default(PENDING)
+  paidAt       DateTime?
+  cycle        ContributionCycle  @relation(fields: [cycleId], references: [id])
+  membership   Membership         @relation(fields: [membershipId], references: [id])
+  payments     Payment[]
+
+  @@unique([cycleId, membershipId])
+}
+
+// One row per payment attempt. providerReference is unique so a duplicate
+// callback from the provider cannot create or confirm a payment twice.
+model Payment {
+  id                String              @id @default(uuid())
+  contributionId    String
+  provider          PaymentProviderName
+  providerReference String              @unique
+  phone             String
+  amount            Int
+  currency          String // the MoMo sandbox only accepts EUR
+  status            PaymentStatus       @default(PENDING)
+  isSandbox         Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  contribution      Contribution        @relation(fields: [contributionId], references: [id])
+
+  @@index([contributionId])
+}

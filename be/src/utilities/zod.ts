@@ -17,3 +17,12 @@ export const loginSchema = z.object({
   email: z.string().trim().email(),
   password: z.string().min(1),
 });
+
+export const createGroupSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(3, "Group name must be at least 3 characters")
+    .max(60, "Group name is too long"),
+  description: z.string().trim().max(300, "Description is too long").optional(),
+});

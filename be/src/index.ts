@@ -5,6 +5,7 @@ import 'dotenv/config';
 import { authRouter } from "./routes/auth";
 import { groupsRouter } from "./routes/groups";
 import { contributionsRouter } from "./routes/contributions";
+import { paymentsRouter } from "./routes/payments";
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/auth", authRouter);
 app.use("/groups", groupsRouter, contributionsRouter);
+app.use(paymentsRouter);
 
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok' });

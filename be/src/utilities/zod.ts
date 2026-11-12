@@ -34,3 +34,20 @@ export const addMemberSchema = z.object({
 export const changeRoleSchema = z.object({
   role: z.enum(["TREASURER", "MEMBER"]),
 });
+
+export const createCycleSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(3, "Title must be at least 3 characters")
+    .max(60, "Title is too long"),
+  amount: z
+    .number("Amount must be a number")
+    .int("Amount must be a whole number of RWF")
+    .min(100, "Amount must be at least 100 RWF")
+    .max(10_000_000, "Amount is too large"),
+  dueDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Use the format YYYY-MM-DD")
+    .refine((value) => !Number.isNaN(Date.parse(value)), "Invalid date"),
+});

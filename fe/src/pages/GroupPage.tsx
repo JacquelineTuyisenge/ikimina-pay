@@ -4,6 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import { api, ApiError } from "../lib/api";
 import type { Group } from "../types";
 import MembersSection from "../components/MembersSection";
+import CyclesSection from "../components/CyclesSection";
+import MyContributions from "../components/MyContributions";
 
 export default function GroupPage() {
   const { groupId } = useParams();
@@ -22,10 +24,10 @@ export default function GroupPage() {
       .finally(() => setLoading(false));
   }, [groupId, token]);
 
-  const canSeeMembers = group?.role === "ADMIN" || group?.role === "TREASURER";
+  const isManager = group?.role === "ADMIN" || group?.role === "TREASURER";
 
   return (
-    <main className="max-w-2xl mx-auto p-4 flex flex-col gap-4">
+    <main className="max-w-2xl mx-auto p-4 flex flex-col gap-6">
       <Link to="/dashboard" className="underline text-sm">
         Back to dashboard
       </Link>
@@ -35,17 +37,18 @@ export default function GroupPage() {
 
       {group && (
         <>
-          <h1 className="text-2xl font-bold">{group.name}</h1>
-          {group.description && <p className="text-gray-600">{group.description}</p>}
-          <p className="text-sm">Your role: {group.role.toLowerCase()}</p>
+          <div>
+            <h1 className="text-2xl font-bold">{group.name}</h1>
+            {group.description && (
+              <p className="text-gray-600">{group.description}</p>
+            )}
+            <p className="text-sm">Your role: {group.role.toLowerCase()}</p>
+          </div>
 
-          {canSeeMembers ? (
-            <MembersSection groupId={group.id} myRole={group.role} />
-          ) : (
-            <p className="text-gray-500">
-              Your contributions will appear here soon.
-            </p>
-          )}
+          <MyContributions groupId={group.id} />
+
+          {isManager && <CyclesSection groupId={group.id} />}
+          {isManager && <MembersSection groupId={group.id} myRole={group.role} />}
         </>
       )}
     </main>

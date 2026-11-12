@@ -26,3 +26,11 @@ export const createGroupSchema = z.object({
     .max(60, "Group name is too long"),
   description: z.string().trim().max(300, "Description is too long").optional(),
 });
+
+export const addMemberSchema = z.object({
+  email: z.string().trim().email("Invalid email"),
+});
+
+export const changeRoleSchema = z.object({
+  role: z.enum(["TREASURER", "MEMBER"]),
+});

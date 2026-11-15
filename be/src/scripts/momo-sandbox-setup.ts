@@ -27,7 +27,7 @@ async function main() {
       "Ocp-Apim-Subscription-Key": subscriptionKey,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ providerCallbackHost: "ikimina-pay.onrender.com" }),
+    body: JSON.stringify({ providerCallbackHost: process.env.MTN_CALLBACK_HOST ?? "ikimina-pay.onrender.com" }),
   });
   if (createUser.status !== 201) {
     await fail("Creating the API user", createUser);

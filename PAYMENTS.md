@@ -14,6 +14,29 @@ Members pay their contributions with mobile money. This document explains how a 
 7. **Verify.** The backend asks MTN directly for the result of that reference. Only if MTN confirms success does the backend mark the payment `SUCCESSFUL` and the contribution `PAID`, in one transaction. If MTN reports failure, the payment becomes `FAILED` and the member can try again.
 8. **Callback.** MTN may also call our server when the status changes. The callback is only a signal to run the same check as in step 7. Its content is never trusted, and a repeated callback changes nothing.
 
+### 2.1 MTN MoMo sandbox setup
+
+Payments run against MTN's sandbox. Each developer needs their own credentials.
+
+1. Create an account at the MTN MoMo developer portal and subscribe to the **Collections** product. Copy its **primary key**.
+2. Copy `be/.env.example` to `be/.env` and fill in `DATABASE_URL`, `JWT_SECRET` and `MTN_SUBSCRIPTION_KEY`.
+3. From the `be` folder, create your sandbox API user and key (this prints two lines, and the key is shown only once):
+   ```bash
+   npx tsx src/scripts/momo-sandbox-setup.ts
+   ```
+4. Paste the two printed lines (`MTN_API_USER`, `MTN_API_KEY`) into `be/.env`, and add:
+   ```
+   MTN_TARGET_ENVIRONMENT=sandbox
+   MTN_CURRENCY=EUR
+   ```
+5. Optional: try a payment without the website:
+   ```bash
+   npx tsx src/scripts/momo-try-payment.ts 250788123456
+   ```
+   Sandbox test numbers: `46733123450` fails, `46733123451` is rejected, `46733123453` stays pending, and an ordinary number succeeds.
+
+Never commit `.env`.
+
 ## 3. What we need
 
 | Need | Details |

@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
 import { formatDate, formatRwf } from "../lib/format";
 import type { MyContribution } from "../types";
+import PayButton from "./PayButton";
 
 function statusInfo(item: MyContribution) {
   if (item.status === "PAID") {
@@ -33,6 +34,21 @@ export default function MyContributions({ groupId }: Props) {
       .finally(() => setLoading(false));
   }, [groupId, token]);
 
+  function markPaid(id: string) {
+    setItems((current) =>
+      current.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              status: "PAID" as const,
+              paidAt: new Date().toISOString(),
+              isLate: false,
+            }
+          : item
+      )
+    );
+  }
+
   return (
     <section className="flex flex-col gap-3">
       <h2 className="text-xl font-semibold">My contributions</h2>
@@ -47,19 +63,26 @@ export default function MyContributions({ groupId }: Props) {
         {items.map((item) => {
           const status = statusInfo(item);
           return (
-            <li
-              key={item.id}
-              className="border rounded p-3 flex items-center justify-between gap-3"
-            >
-              <div>
-                <p className="font-medium">{item.cycle.title}</p>
-                <p className="text-sm text-gray-600">
-                  {formatRwf(item.amount)}, due {formatDate(item.cycle.dueDate)}
-                </p>
+            <li key={item.id} className="border rounded p-3 flex flex-col gap-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-medium">{item.cycle.title}</p>
+                  <p className="text-sm text-gray-600">
+                    {formatRwf(item.amount)}, due {formatDate(item.cycle.dueDate)}
+                  </p>
+                </div>
+                <span className={`text-sm rounded px-2 py-1 ${status.className}`}>
+                  {status.label}
+                </span>
               </div>
-              <span className={`text-sm rounded px-2 py-1 ${status.className}`}>
-                {status.label}
-              </span>
+
+              {item.status === "PENDING" && (
+                <PayButton
+                  groupId={groupId}
+                  contributionId={item.id}
+                  onPaid={() => markPaid(item.id)}
+                />
+              )}
             </li>
           );
         })}

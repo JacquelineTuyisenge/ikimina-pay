@@ -1,20 +1,27 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
 export class ApiError extends Error {
-    status!: number;
-    details?: Record<string, string[]>;
+  status: number;
+  details?: Record<string, string[]>;
+  body: Record<string, unknown> | null;
 
-    constructor(message: string, status: number, details?: Record<string, string[]>){
-        super(message);
-        this.status = status;
-        this.details = details;
-    }
+  constructor(
+    message: string,
+    status: number,
+    details?: Record<string, string[]>,
+    body: Record<string, unknown> | null = null
+  ) {
+    super(message);
+    this.status = status;
+    this.details = details;
+    this.body = body;
+  }
 }
 
 type RequestOptions = {
-    method?: string;
-    body?: unknown;
-    token?: string | null;
+  method?: string;
+  body?: unknown;
+  token?: string | null;
 };
 
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -30,7 +37,12 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new ApiError(data?.error ?? "Something went wrong", response.status, data?.details);
+    throw new ApiError(
+      data?.error ?? "Something went wrong",
+      response.status,
+      data?.details,
+      data
+    );
   }
 
   return data as T;
